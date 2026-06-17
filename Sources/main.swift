@@ -82,7 +82,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, TimerActions, UNUserNo
     private var popover: NSPopover!
     private var popoverVC: PopoverViewController!
 
+    static let appIcon: NSImage? = {
+        guard let path = Bundle.main.path(forResource: "TimerBar", ofType: "icns") else { return nil }
+        return NSImage(contentsOfFile: path)
+    }()
+
     func applicationDidFinishLaunching(_ notification: Notification) {
+        if let icon = AppDelegate.appIcon { NSApp.applicationIconImage = icon }
+
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.imagePosition = .imageLeading
 
@@ -426,6 +433,19 @@ final class PopoverViewController: NSViewController, NSTextFieldDelegate {
             masterStack.leadingAnchor.constraint(equalTo: root.leadingAnchor, constant: inset),
             masterStack.widthAnchor.constraint(equalToConstant: innerWidth)
         ])
+
+        // Header: app icon + name
+        let iconView = NSImageView(image: AppDelegate.appIcon ?? NSImage())
+        iconView.imageScaling = .scaleProportionallyUpOrDown
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        iconView.widthAnchor.constraint(equalToConstant: 22).isActive = true
+        iconView.heightAnchor.constraint(equalToConstant: 22).isActive = true
+        let titleLabel = NSTextField(labelWithString: "TimerBar")
+        titleLabel.font = .boldSystemFont(ofSize: 13)
+        let headerRow = NSStackView(views: [iconView, titleLabel])
+        headerRow.orientation = .horizontal
+        headerRow.spacing = 7
+        masterStack.addArrangedSubview(headerRow)
 
         // "+ Create Timer" toggle
         newButton = NSButton(title: "  \u{2795}  Create Timer", target: self, action: #selector(showForm))
